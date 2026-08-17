@@ -61,6 +61,11 @@ class ProductCreateSchema(BaseModel):
     price: int = Field(..., gt=0, description="Цена товара должна быть целым числом и больше нуля")
     is_active: bool = Field(default=True, description="Активен ли товар для покупки")
 
+class ProductUpdateSchema(BaseModel):
+    name: str = Field(..., min_length=1, max_length=100, description="Название товара")
+    price: int = Field(..., gt=0, description="Цена товара должна быть целым числом и больше нуля")
+    is_active: bool = Field(default=True, description="Активен ли товар для покупки")
+
 class ProductDtoSchema(BaseModel):
     id: int = Field(..., description="ID товара")
     name: str = Field(..., description="Название товара")
