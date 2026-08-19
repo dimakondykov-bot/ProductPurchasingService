@@ -4,7 +4,6 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
-from sqlalchemy.sql.functions import current_user
 
 from src.database.connection import get_async_session
 from src.models.all_models import User
@@ -14,8 +13,8 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="users/login", auto_error=False)
 
 
 async def get_current_user(
-        token: str = Depends(oauth2_scheme),
-        session: AsyncSession = Depends(get_async_session)
+    token: str = Depends(oauth2_scheme),
+    session: AsyncSession = Depends(get_async_session),
 ) -> User:
     # Настраиваем общую ошибку 401 Unauthorized по ТЗ
     credentials_exception = HTTPException(
@@ -44,9 +43,15 @@ async def get_current_user(
 
     return user  # Возвращаем живой объект пользователя из базы!
 
-async def get_current_admin_user(current_user: User = Depends(get_current_user)) -> User:
+
+async def get_current_admin_user(
+    current_user: User = Depends(get_current_user),
+) -> User:
 
     if not current_user.is_admin:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Требуются права администратора")
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Требуются права администратора",
+        )
 
     return current_user

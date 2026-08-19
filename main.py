@@ -3,14 +3,13 @@ from pathlib import Path
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException, Request, status
 from fastapi.responses import JSONResponse
-from fastapi.params import Depends
 from dotenv import load_dotenv
 
 from src.controllers import auth
 from src.controllers import products
 from src.controllers import cart
 from src.database.connection import engine
-from src.models.all_models import Base, User
+from src.models.all_models import Base
 
 # Буду писать себе напоминалки
 
@@ -22,7 +21,8 @@ load_dotenv(os.path.join(BASE_DIR, ".env"))
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # В момент старта сервера даем команду SQLAlchemy создать все таблицы в PostgreSQL
-    async with engine.begin() as conn:  # .begin() Этот метод открывает асинхронную транзакцию (соединение) с базой данных.
+    # .begin() Этот метод открывает асинхронную транзакцию (соединение) с базой данных.
+    async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)  #
     yield  # В этой точке сервер запускается и начинает принимать запросы
 
@@ -34,6 +34,7 @@ app = FastAPI(
     lifespan=lifespan,
 )  # Тут я создаю приложение и внутри скобок задаю название проекта
 
+
 @app.exception_handler(HTTPException)
 async def custom_http_exception_handler(request: Request, exc: HTTPException):
     # Если в коде сработала ошибка 401 Unauthorized
@@ -41,7 +42,7 @@ async def custom_http_exception_handler(request: Request, exc: HTTPException):
         # Возвращаем чистый JSON без слова "detail", ровно как просит ТЗ в пункте 5!
         return JSONResponse(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            content={"code": 401, "message": "Unauthorized"}
+            content={"code": 401, "message": "Unauthorized"},
         )
     # Для всех остальных ошибок (например, 404 или 403) оставляем стандартное поведение
     return JSONResponse(status_code=exc.status_code, content={"detail": exc.detail})
@@ -59,5 +60,5 @@ async def root():
     """Корневой эндпоинт. Доступен всем без авторизации для проверки статуса API."""
     return {
         "status": "success",
-        "message": "Добро пожаловать в Product Purchasing Service API! Сервер работает стабильно."
+        "message": "Добро пожаловать в Product Purchasing Service API! Сервер работает стабильно.",
     }

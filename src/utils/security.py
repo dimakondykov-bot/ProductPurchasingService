@@ -13,7 +13,7 @@ pwd_context = CryptContext(schemes=["sha256_crypt"], deprecated="auto")
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     # Проверяем: если база данных вернула хэш в виде байт, переводим его в обычный текст
     if isinstance(hashed_password, bytes):
-        hashed_password = hashed_password.decode('utf-8')
+        hashed_password = hashed_password.decode("utf-8")
 
     # Принудительно превращаем хэш в строку на случай любых капризов базы данных
     hashed_str = str(hashed_password)
